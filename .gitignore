@@ -219,3 +219,6 @@ __marimo__/
 
 # Mac specific files
 .DS_Store
+
+# Pycharm files
+.idea
