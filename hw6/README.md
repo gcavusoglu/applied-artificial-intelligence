@@ -1,10 +1,17 @@
 
-- Uses SQLite 3 databases
-- Uses "unsloth/gemma-4-12B-it" model
-- Main program is in app.py
-- Before running app.py, run create-table.py.
+# Tool Calling
+
+- An implementation where AI can list or buy books from an imaginary bookshop.
 - Only actions AI can take is list books and buy books. Buying a book removes it from the DB.
-- Examples:
+
+## How to Run
+- Download Python 3.13
+- Download SQLite Server.
+- Run "pip install -r requirements.txt"
+- Run create-table.py.
+- Run app.py
+
+## Examples
 
 "List me books of AI Book Cafe"
 
@@ -40,3 +47,8 @@ Here is the list of books currently available at the AI Book Cafe:
   [Step 1] Calling: 'buy_book'
   [Step 1] 🔌 Tool Result: Successfully bought book "Dune"
 Successfully bought book "Dune"
+
+## Structure
+- Uses SQLite 3 database
+- Uses "unsloth/gemma-4-12B-it" model
+- I did not create another backend. Instead functions that are called by tool update DB directly. This way application is more lightweight. 
