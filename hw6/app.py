@@ -2,6 +2,7 @@ import json
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 import re
+import sqlite3
 
 def get_chat_template():
     return "{{ bos_token }} \
@@ -70,12 +71,14 @@ def get_book_list():
       ...
     ]
     """
-    return [{'id': 1, 'name': "The Alchemist", 'writer': "Paulo Coelho", 'genre': "allegory"},
-          {'id': 2, 'name': "Dune", 'writer': "Frank Herbert", 'genre': "science fiction"},
-          {'id': 3, 'name': "Murder on the Orient Express", 'writer': "Agatha Christie", 'genre': "mystery"},
-          {'id': 4, 'name': "Sapiens: A Brief History of Humankind", 'writer': "Yuval Noah Harari", 'genre': "history"},
-          {'id': 5, 'name': "Pride and Prejudice", 'writer': "Jane Austen", 'genre': "romance"},
-          {'id': 6, 'name': "Atomic Habits", 'writer': "James Clear", 'genre': "self-help"}]
+    with sqlite3.connect("hw.db") as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM books")
+
+        rows = cursor.fetchall()
+
+    return rows
 
 def buy_book(book_name: str) -> str:
   """
@@ -92,12 +95,19 @@ def buy_book(book_name: str) -> str:
   Args:
     book_name: The name of the book to be bought. For example, "The Alchemist".
   """
-  book_list = get_book_list()
-  book = [book for book in book_list if book["name"] == book_name]
-  if book is None:
-    return f"Book \"{book_name}\" not found"
-  else:
-    return f"Successfully bought book \"{book_name}\""
+  with sqlite3.connect("hw.db") as conn:
+      cursor = conn.cursor()
+
+      search_query = "SELECT * FROM books WHERE name = ?"
+      cursor.execute(search_query, (book_name,))
+      record = cursor.fetchone()
+      if record is None:
+        return f"Book \"{book_name}\" not found"
+
+      delete_query = "DELETE FROM books WHERE name = ?"
+      cursor.execute(delete_query, (book_name,))
+      conn.commit()
+      return f"Successfully bought book \"{book_name}\""
 
 TOOLS = [get_book_list, buy_book]
 
@@ -134,7 +144,7 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 
 def run_agent_workflow(user_query: str):
-    print(f"\n🚀 Kullanıcı Talebi: {user_query}")
+    print(f"\n🚀 User Query: {user_query}")
 
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
@@ -187,6 +197,16 @@ def run_agent_workflow(user_query: str):
           print(content)
           break
 
-run_agent_workflow("List me books of AI Book Cafe")
 
-run_agent_workflow("Buy 'Dune' from AI Book Cafe")
+def main():
+    while True:
+        query = input("Enter query (enter 'exit' to exit): ")
+        if query == 'exit':
+            break
+        run_agent_workflow(query)
+
+    #run_agent_workflow("List me books of AI Book Cafe")
+    #run_agent_workflow("Buy 'Dune' from AI Book Cafe")
+
+if __name__ == "__main__":
+    main()
