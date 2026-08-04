@@ -1,6 +1,6 @@
-pip install -U bitsandbytes>=0.46.1
-pip install json
-pip install torch
-pip install transformers
-pip install yaml
-pip install re
+bitsandbytes>=0.46.1
+json
+torch
+transformers
+yaml
+re
