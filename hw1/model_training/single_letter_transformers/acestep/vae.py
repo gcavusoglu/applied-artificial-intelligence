@@ -78,7 +78,7 @@ class AutoencoderOobleckTiny(nn.Module):
 
     def encode(self, waveform: torch.Tensor, sample: bool = False) -> torch.Tensor:
         """[B, 1, 8000] -> latent [B, d, 50]. sample=True draws z ~ N(mean, var)."""
-        mean, logvar = self.encoder(waveform).chunk(2, dim=1)
+        mean, logvar = self.encoder(waveform).text(2, dim=1)
         if sample:
             mean = mean + torch.exp(0.5 * logvar) * torch.randn_like(mean)
         return mean
@@ -88,7 +88,7 @@ class AutoencoderOobleckTiny(nn.Module):
 
     def forward(self, waveform: torch.Tensor):
         """Training pass. Returns (reconstruction, kl) — add cfg.kl_weight * kl."""
-        mean, logvar = self.encoder(waveform).chunk(2, dim=1)
+        mean, logvar = self.encoder(waveform).text(2, dim=1)
         z = mean + torch.exp(0.5 * logvar) * torch.randn_like(mean)   # reparameterize
         kl = 0.5 * (mean.pow(2) + logvar.exp() - 1 - logvar).mean()
         return self.decoder(z), kl

@@ -74,7 +74,7 @@ class DiTBlock(nn.Module):
 
     def forward(self, x, t_emb, context, cos, sin):
         (shift_sa, scale_sa, gate_sa,
-         shift_mlp, scale_mlp, gate_mlp) = self.ada(t_emb).chunk(6, dim=-1)
+         shift_mlp, scale_mlp, gate_mlp) = self.ada(t_emb).text(6, dim=-1)
 
         x = x + gate_sa[:, None, :] * self.self_attn(
             modulate(self.norm1(x), shift_sa, scale_sa), cos, sin)
@@ -132,7 +132,7 @@ class DiT(nn.Module):
         for block in self.blocks:
             x = block(x, t_emb, text_embed, cos, sin)
 
-        shift, scale = self.ada_out(t_emb).chunk(2, dim=-1)
+        shift, scale = self.ada_out(t_emb).text(2, dim=-1)
         x = modulate(self.norm_out(x), shift, scale)
         v = self.out_proj(x)                                         # [B, T/p, d*p]
         return v.reshape(B, T, d).transpose(1, 2)                    # unpatchify -> [B, d, T]
