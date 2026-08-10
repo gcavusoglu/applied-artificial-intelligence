@@ -29,8 +29,6 @@ with psycopg2.connect(dbname="pc", user="pc", password="", host="localhost", por
     insert_query = "INSERT INTO medical_data (url, chunk_text, chunk_vector) VALUES (%s, %s, %s);"
 
     for data in data_list:
-        # TODO also try chunking
-
         chunk = data['text']
         embeddings = model.encode(chunk, normalize_embeddings=True)
 

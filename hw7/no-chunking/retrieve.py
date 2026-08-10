@@ -8,7 +8,7 @@ model = SentenceTransformer(
     trust_remote_code=True
 )
 
-question_vector = model.encode("Zika virüsü nedir?", normalize_embeddings=True)
+question_vector = model.encode("Pil nedir?", normalize_embeddings=True)
 cutoff_similarity = 0.5
 
 with psycopg2.connect(dbname="pc", user="pc", password="", host="localhost", port="5432") as conn:

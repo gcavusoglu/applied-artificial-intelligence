@@ -8,7 +8,7 @@ model = SentenceTransformer(
     trust_remote_code=True
 )
 
-question_vector = model.encode("Yumurtalık kistlerini bana açıkla.", normalize_embeddings=True)[:384] # 768 / 2
+question_vector = model.encode("Pil nedir?", normalize_embeddings=True)[:384] # 768 / 2
 cutoff_similarity = 0.5
 
 with psycopg2.connect(dbname="pc", user="pc", password="", host="localhost", port="5432") as conn:
@@ -17,7 +17,7 @@ with psycopg2.connect(dbname="pc", user="pc", password="", host="localhost", por
 
     query = """
             SELECT url, chunk_text,  1 - (chunk_vector <=> %s) AS similarity
-            FROM medical_data
+            FROM medical_data_semantic_chunk_half_dim
             WHERE 1 - (chunk_vector <=> %s) >= %s
             ORDER BY similarity DESC;
          """
