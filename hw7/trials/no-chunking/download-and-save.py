@@ -7,7 +7,7 @@ from pgvector.psycopg2 import register_vector
 from sentence_transformers import SentenceTransformer
 
 # Get dataset
-login(token="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")
+login(token="")
 
 streamed_dataset = load_dataset("umutertugrul/turkish-hospital-medical-articles", streaming=True)
 raw_stream = next(iter(streamed_dataset.values()))

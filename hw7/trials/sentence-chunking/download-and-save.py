@@ -6,6 +6,20 @@ from huggingface_hub import login
 from pgvector.psycopg2 import register_vector
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer
+import nltk
+import ssl
+
+# SSL'i kapat
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+
+# Türkçe cümle bölücü için gerekli veriyi indirin (İlk kullanımda zorunludur)
+nltk.download('punkt')
+nltk.download('punkt_tab')  # Güncel nltk sürümleri için gereklidir
 
 model_name = "alibayram/embeddingmagibu-200m"
 model = SentenceTransformer(
@@ -14,43 +28,13 @@ model = SentenceTransformer(
 )
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-# With an 8k context window, a larger chunk size like 2000 keeps deep semantic context intact.
-MAX_CHUNK_TOKENS = 2000
-
 def get_chunk_list(txt):
-    paragraphs = [p.strip() for p in txt.split("\n") if p.strip()]
-    print(paragraphs[0])
+    sentences = nltk.tokenize.sent_tokenize(txt, language='turkish')
 
-    text_ch = []
-    current_chunk = []
-    current_tokens = 0
-
-    for paragraph in paragraphs:
-        paragraph_tokens = len(tokenizer.encode(paragraph, add_special_tokens=False))
-
-        if paragraph_tokens > MAX_CHUNK_TOKENS:
-            if current_chunk:
-                text_ch.append("\n".join(current_chunk))
-                current_chunk = []
-                current_tokens = 0
-            text_ch.append(paragraph)
-            continue
-
-        if current_tokens + paragraph_tokens > MAX_CHUNK_TOKENS:
-            text_ch.append("\n".join(current_chunk))
-            current_chunk = [paragraph]
-            current_tokens = paragraph_tokens
-        else:
-            current_chunk.append(paragraph)
-            current_tokens += paragraph_tokens
-
-    # Add last paragraphs
-    if current_chunk:
-        text_ch.append("\n".join(current_chunk))
-    return text_ch
+    return [s.strip() for s in sentences if s.strip()]
 
 # Get dataset
-login(token="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")
+login(token="")
 
 streamed_dataset = load_dataset("umutertugrul/turkish-hospital-medical-articles", streaming=True)
 raw_stream = next(iter(streamed_dataset.values()))
@@ -80,6 +64,3 @@ with psycopg2.connect(dbname="pc", user="pc", password="", host="localhost", por
             cur.execute(insert_query, (data['url'], text_chunks[i], embedding_list[i]))
 
         conn.commit()
-
-        # TODO
-        break

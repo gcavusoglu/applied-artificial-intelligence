@@ -3,7 +3,7 @@ import itertools
 from datasets import load_dataset
 from huggingface_hub import login
 
-login(token="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")
+login(token="")
 
 streamed_dataset = load_dataset("umutertugrul/turkish-hospital-medical-articles", streaming=True)
 

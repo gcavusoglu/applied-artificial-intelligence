@@ -15,27 +15,42 @@ model = SentenceTransformer(
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 # With an 8k context window, a larger chunk size like 2000 keeps deep semantic context intact.
-CHUNK_SIZE = 2000
-OVERLAP = 200
+MAX_CHUNK_TOKENS = 2000
 
 def get_chunk_list(txt):
-    # Convert the text into token IDs
-    token_list = tokenizer.encode(txt, add_special_tokens=False)
+    paragraphs = [p.strip() for p in txt.split("\n") if p.strip()]
+    print(paragraphs[0])
 
-    # Slice tokens into overlapping chunks
-    token_ch = []
-    for i in range(0, len(token_list), CHUNK_SIZE - OVERLAP):
-        chunk_text = token_list[i: i + CHUNK_SIZE]
-        token_ch.append(chunk_text)
-        if i + CHUNK_SIZE >= len(token_list):
-            break
+    text_ch = []
+    current_chunk = []
+    current_tokens = 0
 
-    # Decode token segments back into text strings
-    text_ch = [tokenizer.decode(chunk, skip_special_tokens=True) for chunk in token_ch]
+    for paragraph in paragraphs:
+        paragraph_tokens = len(tokenizer.encode(paragraph, add_special_tokens=False))
+
+        if paragraph_tokens > MAX_CHUNK_TOKENS:
+            if current_chunk:
+                text_ch.append("\n".join(current_chunk))
+                current_chunk = []
+                current_tokens = 0
+            text_ch.append(paragraph)
+            continue
+
+        if current_tokens + paragraph_tokens > MAX_CHUNK_TOKENS:
+            text_ch.append("\n".join(current_chunk))
+            current_chunk = [paragraph]
+            current_tokens = paragraph_tokens
+        else:
+            current_chunk.append(paragraph)
+            current_tokens += paragraph_tokens
+
+    # Add last paragraphs
+    if current_chunk:
+        text_ch.append("\n".join(current_chunk))
     return text_ch
 
 # Get dataset
-login(token="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")
+login(token="")
 
 streamed_dataset = load_dataset("umutertugrul/turkish-hospital-medical-articles", streaming=True)
 raw_stream = next(iter(streamed_dataset.values()))
@@ -65,3 +80,6 @@ with psycopg2.connect(dbname="pc", user="pc", password="", host="localhost", por
             cur.execute(insert_query, (data['url'], text_chunks[i], embedding_list[i]))
 
         conn.commit()
+
+        # TODO
+        break

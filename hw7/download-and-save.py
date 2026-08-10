@@ -67,7 +67,7 @@ def get_chunk_list(txt):
     return chunks
 
 # Get dataset
-login(token="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")
+login(token="")
 
 streamed_dataset = load_dataset("umutertugrul/turkish-hospital-medical-articles", streaming=True)
 raw_stream = next(iter(streamed_dataset.values()))
@@ -89,7 +89,6 @@ with psycopg2.connect(dbname="pc", user="pc", password="", host="localhost", por
         text_chunks = get_chunk_list(text)
 
         embedding_list = model.encode(text_chunks, normalize_embeddings=True)
-        embedding_list = np.array([embedding[:384] for embedding in embedding_list])
 
         print(f"Generated {len(embedding_list)} embeddings.")
         print(f"Embedding shape: {embedding_list.shape}")

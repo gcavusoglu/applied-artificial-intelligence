@@ -6,20 +6,6 @@ from huggingface_hub import login
 from pgvector.psycopg2 import register_vector
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer
-import nltk
-import ssl
-
-# SSL'i kapat
-try:
-    _create_unverified_https_context = ssl._create_unverified_context
-except AttributeError:
-    pass
-else:
-    ssl._create_default_https_context = _create_unverified_https_context
-
-# Türkçe cümle bölücü için gerekli veriyi indirin (İlk kullanımda zorunludur)
-nltk.download('punkt')
-nltk.download('punkt_tab')  # Güncel nltk sürümleri için gereklidir
 
 model_name = "alibayram/embeddingmagibu-200m"
 model = SentenceTransformer(
@@ -28,13 +14,28 @@ model = SentenceTransformer(
 )
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-def get_chunk_list(txt):
-    sentences = nltk.tokenize.sent_tokenize(txt, language='turkish')
+# With an 8k context window, a larger chunk size like 2000 keeps deep semantic context intact.
+CHUNK_SIZE = 2000
+OVERLAP = 200
 
-    return [s.strip() for s in sentences if s.strip()]
+def get_chunk_list(txt):
+    # Convert the text into token IDs
+    token_list = tokenizer.encode(txt, add_special_tokens=False)
+
+    # Slice tokens into overlapping chunks
+    token_ch = []
+    for i in range(0, len(token_list), CHUNK_SIZE - OVERLAP):
+        chunk_text = token_list[i: i + CHUNK_SIZE]
+        token_ch.append(chunk_text)
+        if i + CHUNK_SIZE >= len(token_list):
+            break
+
+    # Decode token segments back into text strings
+    text_ch = [tokenizer.decode(chunk, skip_special_tokens=True) for chunk in token_ch]
+    return text_ch
 
 # Get dataset
-login(token="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")
+login(token="")
 
 streamed_dataset = load_dataset("umutertugrul/turkish-hospital-medical-articles", streaming=True)
 raw_stream = next(iter(streamed_dataset.values()))
