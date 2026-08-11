@@ -72,7 +72,7 @@ login(token="")
 streamed_dataset = load_dataset("umutertugrul/turkish-hospital-medical-articles", streaming=True)
 raw_stream = next(iter(streamed_dataset.values()))
 data_list = list(itertools.islice(raw_stream, 100))
-print(f"Successfully retrieved {len(data_list)} rows without downloading the full dataset.")
+print(f"Successfully retrieved {len(data_list)}.")
 
 if len(data_list) == 0:
     print("Error - No data received")
