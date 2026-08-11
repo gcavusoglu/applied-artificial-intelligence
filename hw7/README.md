@@ -6,7 +6,20 @@ Hugging Face üzerindeki umutertugrul/turkish-hospital-medical-articles veri set
 İlgili veri setinden ilk 100 makale (doküman) seçildi. 
 
 ## Chunking Stratejisi 
-//TODO put your results..
+
+Chunking için aşağıdaki stratejiler denendi:
+
+### Chunking Yok
+
+![img.png](img.png)
+
+### Sabit Token Sayısı + Overlap
+
+### Sentence Chunking
+
+### Semantic Chunking
+
+Makalelerde paragrafları ayırmak zor olduğu için Paragraf Chunking yapamadım.
 
 # Vektör Veri Tabanı Mimarisi & Şeması
 
