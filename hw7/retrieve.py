@@ -17,7 +17,7 @@ with psycopg2.connect(dbname="pc", user="pc", password="", host="localhost", por
 
     query = """
             SELECT url, chunk_text,  1 - (chunk_vector <=> %s) AS similarity
-            FROM medical_data
+            FROM medical_data_semantic_chunk
             WHERE 1 - (chunk_vector <=> %s) >= %s
             ORDER BY similarity DESC;
          """

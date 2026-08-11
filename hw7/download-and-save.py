@@ -81,7 +81,7 @@ if len(data_list) == 0:
 with psycopg2.connect(dbname="pc", user="pc", password="", host="localhost", port="5432") as conn:
     register_vector(conn)
     cur = conn.cursor()
-    insert_query = "INSERT INTO medical_data (url, chunk_text, chunk_vector) VALUES (%s, %s, %s);"
+    insert_query = "INSERT INTO medical_data_semantic_chunk (url, chunk_text, chunk_vector) VALUES (%s, %s, %s);"
 
     for data in data_list:
         text = data['text']
