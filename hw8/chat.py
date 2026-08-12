@@ -7,7 +7,6 @@ Dongu cok basit:
 
 Kullanim:
     python3 chat.py
-    python3 chat.py --embed-model magibu     # diger embedding modeliyle ara
 """
 
 import ollama_client
